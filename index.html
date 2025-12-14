@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>来领祝福啦</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: url("images/b.jpeg") no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-align-items: center;
+            align-items: center;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0);
+            z-index: -1;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: clamp(30px, 8vw, 60px) clamp(20px, 5vw, 40px);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 550px;
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            gap: clamp(15px, 4vw, 25px);
+        }
+        .card:hover {
+            transform: translateY(-8px);
+        }
+        h1 {
+            color: #e85d75;
+            margin-bottom: 5px;
+            font-size: clamp(24px, 6vw, 32px);
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: clamp(14px, 3vw, 16px);
+            opacity: 0.8;
+        }
+        #birthdayInput {
+            width: 80%;
+            padding: clamp(14px, 3vw, 18px) clamp(16px, 3vw, 20px);
+            border: 2px solid #fef0f3;
+            border-radius: 12px;
+            font-size: clamp(16px, 3.5vw, 18px);
+            outline: none;
+            background: #fef9fa;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            text-align: center;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        #birthdayInput:focus {
+            border-color: #e85d75;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.1);
+        }
+        #wishBtn {
+            background: linear-gradient(90deg, #e85d75, #f78361);
+            color: #fff;
+            border: none;
+            padding: clamp(14px, 3vw, 18px) 0;
+            border-radius: 12px;
+            font-size: clamp(18px, 3.5vw, 20px);
+            font-weight: 600;
+            cursor: pointer;
+            width: 60%;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(232, 93, 117, 0.2);
+            margin: 0 auto;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        #wishBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(232, 93, 117, 0.3);
+        }
+        #wishBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(232, 93, 117, 0.2);
+        }
+        #result {
+            font-size: clamp(18px, 4vw, 22px);
+            color: #333;
+            min-height: 60px;
+            padding: clamp(20px, 4vw, 25px);
+            border-radius: 12px;
+            background: #fef9fa;
+            line-height: 1.5;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            width: 90%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        #result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .special-wish {
+            color: #e85d75;
+            font-style: italic;
+            font-weight: 600;
+        }
+        .error-tip {
+            color: #ff4444;
+            font-size: clamp(16px, 3.5vw, 18px);
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>生日祝福盲盒</h1>
+    <p class="subtitle">输入您的生日，领取专属祝福</p>
+    <input type="text" id="birthdayInput" placeholder="请输入您的诞辰">
+    <button id="wishBtn">生成祝福</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    window.onload = function() {
+        const inputEle = document.getElementById("birthdayInput");
+        const btnEle = document.getElementById("wishBtn");
+        const resultEle = document.getElementById("result");
+
+        const normalWishes = [
+            "喝好，吃好，玩好～",
+            "生日快乐！愿日子清透，万事温柔✨",
+            "新的一岁，平安喜乐，万事胜意～",
+            "生日快乐呀！愿你被时光温柔以待～",
+            "解锁新一岁，继续闪闪发光吧🌟",
+            "生日宜快乐，宜吃蛋糕，宜收礼物～",
+            "愿你岁岁常欢愉，年年皆胜意～",
+            "新的365天，也要充满热爱哦❤️",
+            "生日快乐！今天只管开心，其他都不重要～",
+            "愿所有美好和温柔都如约而至，生日快乐～"
+        ];
+
+        function isValidBirthday(dateStr) {
+            const reg = /^\d{6}$|^\d{8}$/;
+            if (!reg.test(dateStr)) return false;
+            let month, day;
+            if (dateStr.length === 6) {
+                month = parseInt(dateStr.substring(0, 2));
+                day = parseInt(dateStr.substring(2, 4));
+            } else {
+                month = parseInt(dateStr.substring(4, 6));
+                day = parseInt(dateStr.substring(6, 8));
+            }
+            return month >= 1 && month <= 12 && day >= 1 && day <= 31;
+        }
+
+        function getRandomNormalWish() {
+            const randomIndex = Math.floor(Math.random() * normalWishes.length);
+            return normalWishes[randomIndex];
+        }
+
+        function generateWish() {
+            resultEle.className = "";
+            resultEle.classList.remove("show");
+            const inputValue = inputEle.value.trim();
+            if (!inputValue) {
+                resultEle.textContent = "请输入你的生日（年月日格式）～";
+                resultEle.classList.add("error-tip", "show");
+                return;
+            }
+            if (!isValidBirthday(inputValue)) {
+                resultEle.textContent = "生日格式错误！请输入6/8位数字（例如：20000101）";
+                resultEle.classList.add("error-tip", "show");
+                return;
+            }
+            const specialDates = ["080520", "080621"];
+            const shortDate = inputValue.slice(-6);
+            if (specialDates.includes(shortDate)) {
+                resultEle.innerHTML = `<span class="special-wish">Wherever you go, I’m your shadow in the light — always with you, even when you don’t see me.</span>`;
+            } else {
+                resultEle.textContent = getRandomNormalWish();
+            }
+            resultEle.classList.add("show");
+        }
+
+        btnEle.addEventListener("click", generateWish);
+        btnEle.addEventListener("touchstart", function(e) {
+            e.preventDefault();
+            generateWish();
+        });
+
+        inputEle.addEventListener("keydown", function(e) {
+            if (e.key === "Enter" || e.keyCode === 13 || e.which === 13) {
+                e.preventDefault();
+                generateWish();
+                inputEle.blur();
+            }
+        });
+
+        inputEle.addEventListener("focus", function() {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+    };
+</script>
+</body>
+</html>
